@@ -23,9 +23,9 @@ def sentiment_analysis(bin_pipe: pipeline, multi_pipe: pipeline) -> pd.DataFrame
             for line in file:
                 # skip page markers and page numbers
                 if line.strip() and not line.startswith("---") and not line.isdigit(): 
-                    bin_result = bin_pipe(line.strip())
-                    multi_result = multi_pipe(line.strip())
-                    
+                    bin_result = bin_pipe(line[:512].strip())
+                    multi_result = multi_pipe(line[:512].strip())
+                
                     combined_result = {
                         'text': line[:128].strip(),
                         'binary_label': bin_result[0]['label'],
@@ -37,7 +37,7 @@ def sentiment_analysis(bin_pipe: pipeline, multi_pipe: pipeline) -> pd.DataFrame
                     results.append(combined_result)
         
         results_df = pd.DataFrame(results)
-        results_df.to_csv(os.path.join(RESULTS_DIR, f.replace('.txt', '_sentiment.csv')), index=False)
+        results_df.to_csv(os.path.join(RESULTS_DIR, 'csv', f.replace('.txt', '_sentiment.csv')), index=False)
 
     return results_df
 
@@ -76,10 +76,11 @@ def get_statistics_per_party(df: pd.DataFrame, party: str) -> dict:
 
 def get_overall_statistics() -> pd.DataFrame:
     ''' Compile overall statistics from all sentiment analysis results '''
-    
+    result_csvs = os.path.join(RESULTS_DIR, "csv")
+
     summary_list_per_party = []
     summary_list_per_group = []
-    result_files = [f for f in os.listdir(RESULTS_DIR) if f.endswith('_sentiment.csv')]
+    result_files = [f for f in os.listdir(result_csvs) if f.endswith('_sentiment.csv')]
 
     left_wing_parties = ['pvdd', 'denk', 'sp', 'volt', 'gl-pvda']
     left_wing_df = pd.DataFrame()
@@ -95,10 +96,10 @@ def get_overall_statistics() -> pd.DataFrame:
     religious_parties = ['cu', 'cda', 'sgp']
     religious_df = pd.DataFrame()
 
-    
     for f in result_files:
         party_name = f.replace('_sentiment.csv', '')
-        df = pd.read_csv(os.path.join(RESULTS_DIR, f))
+        df = pd.read_csv(os.path.join(result_csvs, f))
+
         if party_name in left_wing_parties:
             left_wing_df = pd.concat([left_wing_df, df], ignore_index=True)
         elif party_name in central_parties:
@@ -156,13 +157,15 @@ def get_overall_statistics() -> pd.DataFrame:
         'volt': 1
     }
 
+    print(summary_list_per_party)
     summary_per_party_df = pd.DataFrame(summary_list_per_party)
+    print(summary_per_party_df.head())
     summary_per_party_df['seats'] = summary_per_party_df['party'].map(seats).fillna(0).astype(int)
     summary_per_party_df = summary_per_party_df.sort_values(by='seats', ascending=False)
 
     summary_per_group_df = pd.DataFrame(summary_list_per_group)
-    summary_per_party_df.to_csv(os.path.join(RESULTS_DIR, 'sentiment_summary_per_party.csv'), index=False)
-    summary_per_group_df.to_csv(os.path.join(RESULTS_DIR, 'sentiment_summary_per_group.csv'), index=False)
+    summary_per_party_df.to_csv(os.path.join(result_csvs, 'sentiment_summary_per_party.csv'), index=False)
+    summary_per_group_df.to_csv(os.path.join(result_csvs, 'sentiment_summary_per_group.csv'), index=False)
     
     return summary_per_party_df, summary_per_group_df
 
@@ -178,7 +181,7 @@ def plot_statistics(stats_df: pd.DataFrame, name: str='party'):
     plt.xticks(rotation=45)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(RESULTS_DIR, f'binary_sentiment_summary_{name}_plot.png'))
+    plt.savefig(os.path.join(RESULTS_DIR, 'figs', f'binary_sentiment_summary_{name}_plot.png'))
     plt.figure(figsize=(12, 6))
     plt.bar(stats_df['party'], stats_df['multi_very_pos%'], color='darkgreen', alpha=0.6, label='Multi Very Positive %')
     plt.bar(stats_df['party'], stats_df['multi_pos%'], bottom=stats_df['multi_very_pos%'], color='lightgreen', alpha=0.6, label='Multi Positive %')
@@ -194,22 +197,22 @@ def plot_statistics(stats_df: pd.DataFrame, name: str='party'):
     plt.xticks(rotation=45)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(os.path.join(RESULTS_DIR, f'multi_sentiment_summary_{name}_plot.png'))
+    plt.savefig(os.path.join(RESULTS_DIR, 'figs', f'multi_sentiment_summary_{name}_plot.png'))
     plt.show()
 
 def main():
-    # process_manifestos(INPUT_DIR, PROCESSED_DIR)
-    # device = "mps" if torch.backends.mps.is_available() else "cpu"  # or "cpu" if no GPU is available
+    process_manifestos(INPUT_DIR, PROCESSED_DIR)
+    device = "mps" if torch.backends.mps.is_available() else "cpu"  # or "cpu" if no GPU is available
 
-    # # Use a pipeline as a high-level helper
-    # multi_label_pipe = pipeline("text-classification", model="nlptown/bert-base-multilingual-uncased-sentiment", device=device)
-    # multi_label_pipe.model.config.id2label = {0: "very neg", 1: "neg", 2: "neut", 3: "pos", 4: "very pos"}
-    # multi_label_pipe.model.config.label2id = {"very neg": 0, "neg": 1, "neut": 2, "pos": 3, "very pos": 4}
+    # Use a pipeline as a high-level helper
+    multi_label_pipe = pipeline("text-classification", model="nlptown/bert-base-multilingual-uncased-sentiment", device=device)
+    multi_label_pipe.model.config.id2label = {0: "very neg", 1: "neg", 2: "neut", 3: "pos", 4: "very pos"}
+    multi_label_pipe.model.config.label2id = {"very neg": 0, "neg": 1, "neut": 2, "pos": 3, "very pos": 4}
 
-    # binary_pipe = pipeline("text-classification", model="wietsedv/bert-base-dutch-cased-finetuned-sentiment", device=device)
+    binary_pipe = pipeline("text-classification", model="wietsedv/bert-base-dutch-cased-finetuned-sentiment", device=device)
 
-    # sentiment_analysis(binary_pipe, multi_label_pipe)
-    
+    sentiment_analysis(binary_pipe, multi_label_pipe)
+
     stats_per_party, stats_per_group = get_overall_statistics()
 
     plot_statistics(stats_per_party, name='party')
