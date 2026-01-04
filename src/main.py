@@ -21,12 +21,13 @@ def sentiment_analysis(bin_pipe: pipeline, multi_pipe: pipeline) -> pd.DataFrame
         print(f"Analyzing sentiment for: {f}")
         with open(os.path.join(PROCESSED_DIR, f), 'r', encoding='utf-8') as file:
             for line in file:
-                if line.strip() and not line.startswith("---") and not line.startswith("==="):  # Only analyze non-empty lines that are not page markers
-                    bin_result = bin_pipe(line[:512])  # Truncate to first 512 characters
-                    multi_result = multi_pipe(line[:512])
+                # skip page markers and page numbers
+                if line.strip() and not line.startswith("---") and not line.isdigit(): 
+                    bin_result = bin_pipe(line.strip())
+                    multi_result = multi_pipe(line.strip())
                     
                     combined_result = {
-                        'text': line.strip(),
+                        'text': line[:128].strip(),
                         'binary_label': bin_result[0]['label'],
                         'binary_score': bin_result[0]['score'],
                         'multi_label': multi_result[0]['label'],

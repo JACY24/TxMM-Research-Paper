@@ -122,10 +122,8 @@ def process_manifestos(input_folder, output_folder):
                 # Extract using the smart column logic
                 page_text = get_sorted_text(page)
                 
-                # Add page marker
                 all_text.append(f"--- Page {i+1} ---")
                 all_text.append(page_text)
-                all_text.append("\n" + "="*20 + "\n")
             
             with open(txt_path, "w", encoding="utf-8") as f:
                 f.write("\n".join(all_text))
