@@ -54,21 +54,21 @@ def get_statistics_per_party(df: pd.DataFrame, party: str) -> dict:
         'bin_neg%': (len(df[df['binary_label'] == 'neg']) / len(df) * 100) if len(df) > 0 else 0,
         'avg_bin_neg_score': df[df['binary_label'] == 'neg']['binary_score'].mean() if len(df[df['binary_label'] == 'neg']) > 0 else 0,
         'avg_bin_score': df['binary_score'].mean() if len(df) > 0 else 0,
-        'multi_very_pos': len(df[df['multi_label'] == 'very pos']),
-        'multi_very_pos%': (len(df[df['multi_label'] == 'very pos']) / len(df) * 100) if len(df) > 0 else 0,
-        'avg_multi_very_pos_score': df[df['multi_label'] == 'very pos']['multi_score'].mean() if len(df[df['multi_label'] == 'very pos']) > 0 else 0,
-        'multi_pos': len(df[df['multi_label'] == 'pos']),
-        'multi_pos%': (len(df[df['multi_label'] == 'pos']) / len(df) * 100) if len(df) > 0 else 0,
-        'avg_multi_pos_score': df[df['multi_label'] == 'pos']['multi_score'].mean() if len(df[df['multi_label'] == 'pos']) > 0 else 0,
-        'multi_neut': len(df[df['multi_label'] == 'neut']),
-        'multi_neut%': (len(df[df['multi_label'] == 'neut']) / len(df) * 100) if len(df) > 0 else 0,
-        'avg_multi_neut_score': df[df['multi_label'] == 'neut']['multi_score'].mean() if len(df[df['multi_label'] == 'neut']) > 0 else 0,
-        'multi_neg': len(df[df['multi_label'] == 'neg']),
-        'multi_neg%': (len(df[df['multi_label'] == 'neg']) / len(df) * 100) if len(df) > 0 else 0,
-        'avg_multi_neg_score': df[df['multi_label'] == 'neg']['multi_score'].mean() if len(df[df['multi_label'] == 'neg']) > 0 else 0,
-        'multi_very_neg': len(df[df['multi_label'] == 'very neg']),
-        'multi_very_neg%': (len(df[df['multi_label'] == 'very neg']) / len(df) * 100) if len(df) > 0 else 0,
-        'avg_multi_very_neg_score': df[df['multi_label'] == 'very neg']['multi_score'].mean() if len(df[df['multi_label'] == 'very neg']) > 0 else 0,
+        'multi_very_pos': len(df[df['multi_label'] == 'Very Positive']),
+        'multi_very_pos%': (len(df[df['multi_label'] == 'Very Positive']) / len(df) * 100) if len(df) > 0 else 0,
+        'avg_multi_very_pos_score': df[df['multi_label'] == 'Very Positive']['multi_score'].mean() if len(df[df['multi_label'] == 'Very Positive']) > 0 else 0,
+        'multi_pos': len(df[df['multi_label'] == 'Positive']),
+        'multi_pos%': (len(df[df['multi_label'] == 'Positive']) / len(df) * 100) if len(df) > 0 else 0,
+        'avg_multi_pos_score': df[df['multi_label'] == 'Positive']['multi_score'].mean() if len(df[df['multi_label'] == 'Positive']) > 0 else 0,
+        'multi_neut': len(df[df['multi_label'] == 'Neutral']),
+        'multi_neut%': (len(df[df['multi_label'] == 'Neutral']) / len(df) * 100) if len(df) > 0 else 0,
+        'avg_multi_neut_score': df[df['multi_label'] == 'Neutral']['multi_score'].mean() if len(df[df['multi_label'] == 'Neutral']) > 0 else 0,
+        'multi_neg': len(df[df['multi_label'] == 'Negative']),
+        'multi_neg%': (len(df[df['multi_label'] == 'Negative']) / len(df) * 100) if len(df) > 0 else 0,
+        'avg_multi_neg_score': df[df['multi_label'] == 'Negative']['multi_score'].mean() if len(df[df['multi_label'] == 'neg']) > 0 else 0,
+        'multi_very_neg': len(df[df['multi_label'] == 'Very Negative']),
+        'multi_very_neg%': (len(df[df['multi_label'] == 'Very Negative']) / len(df) * 100) if len(df) > 0 else 0,
+        'avg_multi_very_neg_score': df[df['multi_label'] == 'Very Negative']['multi_score'].mean() if len(df[df['multi_label'] == 'Very Negative']) > 0 else 0,
         'avg_multi_score': df['multi_score'].mean() if len(df) > 0 else 0,
     }
 
@@ -172,7 +172,7 @@ def get_overall_statistics() -> pd.DataFrame:
 def plot_statistics(stats_df: pd.DataFrame, name: str='party'):
     ''' Plot sentiment statistics for visualization '''
     
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(6, 4))
     plt.bar(stats_df['party'], stats_df['bin_pos%'], color='green', alpha=0.6, label='Binary Positive %')
     plt.bar(stats_df['party'], stats_df['bin_neg%'], bottom=stats_df['bin_pos%'], color='red', alpha=0.6, label='Binary Negative %')
     plt.xlabel('Political Party')
@@ -182,15 +182,15 @@ def plot_statistics(stats_df: pd.DataFrame, name: str='party'):
     plt.legend()
     plt.tight_layout()
     plt.savefig(os.path.join(RESULTS_DIR, 'figs', f'binary_sentiment_summary_{name}_plot.png'))
-    plt.figure(figsize=(12, 6))
-    plt.bar(stats_df['party'], stats_df['multi_very_pos%'], color='darkgreen', alpha=0.6, label='Multi Very Positive %')
+    plt.figure(figsize=(6, 4))
+    plt.bar(stats_df['party'], stats_df['multi_very_pos%'], color='darkgreen', alpha=0.6, label='Multi Very Positiveitive %')
     plt.bar(stats_df['party'], stats_df['multi_pos%'], bottom=stats_df['multi_very_pos%'], color='lightgreen', alpha=0.6, label='Multi Positive %')
     bottom_neut = stats_df['multi_very_pos%'] + stats_df['multi_pos%']
     plt.bar(stats_df['party'], stats_df['multi_neut%'], bottom=bottom_neut, color='gray', alpha=0.6, label='Multi Neutral %')
     bottom_neg = bottom_neut + stats_df['multi_neut%']
     plt.bar(stats_df['party'], stats_df['multi_neg%'], bottom=bottom_neg, color='orange', alpha=0.6, label='Multi Negative %')
     bottom_very_neg = bottom_neg + stats_df['multi_neg%']
-    plt.bar(stats_df['party'], stats_df['multi_very_neg%'], bottom=bottom_very_neg, color='darkred', alpha=0.6, label='Multi Very Negative %')
+    plt.bar(stats_df['party'], stats_df['multi_very_neg%'], bottom=bottom_very_neg, color='darkred', alpha=0.6, label='Multi Very Negativeative %')
     plt.xlabel('Political Party')
     plt.ylabel('Percentage (%)')
     plt.title('Multi-label Sentiment Analysis Summary by Party')
@@ -201,22 +201,22 @@ def plot_statistics(stats_df: pd.DataFrame, name: str='party'):
     plt.show()
 
 def main():
-    process_manifestos(INPUT_DIR, PROCESSED_DIR)
+    # # process_manifestos(INPUT_DIR, PROCESSED_DIR)
     device = "mps" if torch.backends.mps.is_available() else "cpu"  # or "cpu" if no GPU is available
 
-    # Use a pipeline as a high-level helper
-    multi_label_pipe = pipeline("text-classification", model="nlptown/bert-base-multilingual-uncased-sentiment", device=device)
-    multi_label_pipe.model.config.id2label = {0: "very neg", 1: "neg", 2: "neut", 3: "pos", 4: "very pos"}
-    multi_label_pipe.model.config.label2id = {"very neg": 0, "neg": 1, "neut": 2, "pos": 3, "very pos": 4}
+    # # Use a pipeline as a high-level helper
+    multi_label_pipe = pipeline("text-classification", model="tabularisai/multilingual-sentiment-analysis", device=device)
+    print(multi_label_pipe.model.config)
 
-    binary_pipe = pipeline("text-classification", model="wietsedv/bert-base-dutch-cased-finetuned-sentiment", device=device)
+    # binary_pipe = pipeline("text-classification", model="wietsedv/bert-base-dutch-cased-finetuned-sentiment", device=device)
 
-    sentiment_analysis(binary_pipe, multi_label_pipe)
+    # sentiment_analysis(binary_pipe, multi_label_pipe)
 
     stats_per_party, stats_per_group = get_overall_statistics()
 
     plot_statistics(stats_per_party, name='party')
     plot_statistics(stats_per_group, name='group')
+
 
 if __name__ == "__main__":
     main()
